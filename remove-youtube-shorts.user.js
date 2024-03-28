@@ -1,51 +1,46 @@
 // ==UserScript==
-// @name         Remove YouTube Shorts from page
-// @namespace    https://github.com/hallzy
-// @version      0.4
-// @description  Removes YouTube Shorts Videos from your current page.
-// @author       Steven Hall
+// @name         Better YouTube
+// @namespace    https://github.com/euzzeud
+// @version      1
+// @description  Improve YouTube Desktop by removing Shorts or unnecessary features.
+// @author       Enzo Gioielli
 // @match        http://*.youtube.com/*
 // @match        https://*.youtube.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
 // @grant        none
 // ==/UserScript==
-(
-    () =>
-    {
-        const removeShorts = () =>
-        {
-            Array
-                .from(document.querySelectorAll(`a[href^="/shorts"]`))
-                .forEach
-                (
-                    a =>
-                    {
-                        let parent = a.parentElement;
 
-                        while (parent && (!parent.tagName.startsWith('YTD-') || parent.tagName === 'YTD-THUMBNAIL'))
-                        {
-                            parent = parent.parentElement;
-                        }
+(() => {
+    const betterYouTube = () => {
 
-                        if (parent)
-                        {
-                            parent.remove();
-                        }
-                    }
-                )
-            ;
-        }
+        // === SHORTS ===
 
-        const observer = new MutationObserver(removeShorts);
-        observer.observe
-        (
-            document,
-            {
-                childList:  true,
-                subtree:    true,
+        // Remove YouTube Shorts Videos
+        Array.from(document.querySelectorAll('a[href^="/shorts"]')).forEach(a => {
+            let parent = a.parentElement;
+            while (parent && (!parent.tagName.startsWith('YTD-') || parent.tagName === 'YTD-THUMBNAIL')) {
+                parent = parent.parentElement;
             }
-        );
+            if (parent) {
+                parent.remove();
+            }
+        });
 
-        removeShorts();
+        // Remove "Shorts" section and others...
+        Array.from(document.querySelectorAll('ytd-reel-shelf-renderer')).forEach(shelf => {
+            const titleElement = shelf.querySelector('#title');
+            if (titleElement && titleElement.innerText === 'Shorts remixing this video' || titleElement.innerText == 'Shorts') {
+                shelf.remove();
+            }
+        });
     }
-)();
+
+    const observer = new MutationObserver(betterYouTube);
+    observer.observe(document, {
+        childList: true,
+        subtree: true,
+    });
+
+    betterYouTube();
+})();
+
